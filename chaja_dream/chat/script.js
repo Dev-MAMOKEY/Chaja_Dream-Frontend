@@ -260,3 +260,40 @@ chatInput.addEventListener('input', () => {
  * [INITIALIZATION] 페이지 로드 시 최초 1회 실행
  */
 startNewChat(); // 접속하자마자 첫 번째 상담이 시작되도록 설정
+
+// URL 파라미터 확인 및 자동 메시지 전송 기능
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const topic = urlParams.get('topic');
+    
+    if (topic) {
+        let autoMsg = "";
+        switch(topic) {
+            case 'job':
+                autoMsg = "현재 실직 중이거나 구직 활동을 하고 있습니다. 제가 받을 수 있는 취업 지원금이나 관련 복지 혜택이 무엇인지 궁금해요.";
+                break;
+            case 'housing':
+                autoMsg = "주거 지원이 필요한 상황입니다. 청년 월세 지원이나 전세 대출 등 주거 관련 복지 혜택에 대해 알려주세요.";
+                break;
+            case 'parenting':
+                autoMsg = "출산 및 육아와 관련된 복지 혜택을 알아보고 싶습니다. 아동수당이나 양육비 지원 등 어떤 도움을 받을 수 있을까요?";
+                break;
+            case 'medical':
+                autoMsg = "의료비 부담이 커서 도움이 필요합니다. 의료급여나 건강보험료 감면 등 의료 관련 복지 제도를 안내해 주세요.";
+                break;
+            case 'senior':
+                autoMsg = "노인 또는 장애인 복지 혜택에 대해 알고 싶습니다. 기초연금이나 돌봄 서비스 등 제가 신청 가능한 혜택이 있을까요?";
+                break;
+            case 'education':
+                autoMsg = "교육비 지원이 필요합니다. 장학금, 학자금 대출 또는 교육급여 등 교육 관련 복지 혜택을 알려주세요.";
+                break;
+        }
+        
+        if (autoMsg) {
+            // 약간의 지연을 주어 환영 인사가 먼저 나오고 유저 메시지가 나오도록 함
+            setTimeout(() => {
+                sendMessage(autoMsg);
+            }, 500);
+        }
+    }
+});
