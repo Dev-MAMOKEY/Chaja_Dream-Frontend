@@ -37,10 +37,10 @@ const GREETING_HTML = `
     </div>
     <!-- 선택지 버튼: 사용자가 타이핑 대신 클릭하여 응답 가능하게 함 -->
     <div class="options">
-        <button class="opt-btn selected">혼자 살아요</button>
-        <button class="opt-btn">부모님과 함께 살아요</button>
-        <button class="opt-btn">배우자/자녀와 함께 살아요</button>
-        <button class="opt-btn">기타</button>
+        <button class="opt-btn" onclick="sendMessage(this.textContent)">혼자 살아요</button>
+        <button class="opt-btn" onclick="sendMessage(this.textContent)">부모님과 함께 살아요</button>
+        <button class="opt-btn" onclick="sendMessage(this.textContent)">배우자/자녀와 함께 살아요</button>
+        <button class="opt-btn" onclick="sendMessage(this.textContent)">기타</button>
     </div>
 `;
 
@@ -76,7 +76,7 @@ function startNewChat() {
     const newId = Date.now(); // 현재 시간을 고유 식별자로 활용
     const newChat = {
         id: newId,
-        title: `상담 ${chats.length + 1}`, // 자동 제목 생성
+        title: `새로운 상담 ${chats.length + 1}`, // 자동 제목 생성 (새로운 상담)
         messages: [GREETING_HTML]        // 기본 환영 인사로 시작
     };
     chats.unshift(newChat); // 배열의 맨 앞에 추가
@@ -178,6 +178,15 @@ function renderChat() {
 function sendMessage(text) {
     if (!text.trim() || !activeChatId) return; // 내용이 없거나 선택된 상담이 없으면 무시
 
+    const chat = chats.find(c => c.id === activeChatId);
+    
+    // 첫 메시지일 경우 상담 제목 업데이트 (입력 내용으로 바로 변경)
+    if (chat && chat.messages.length === 1) {
+        const truncatedText = text.length > 15 ? text.substring(0, 15) + '...' : text;
+        chat.title = truncatedText;
+        renderHistory();
+    }
+
     // 오른쪽 정렬된 사용자용 말풍선 템플릿
     const userMsg = `
         <div class="message-wrapper" style="justify-content: flex-end;">
@@ -187,7 +196,6 @@ function sendMessage(text) {
         </div>
     `;
     
-    const chat = chats.find(c => c.id === activeChatId);
     chat.messages.push(userMsg); // 데이터에 저장
     
     renderChat(); // 화면 갱신
