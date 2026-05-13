@@ -1,0 +1,247 @@
+/* [COLOR PALETTE] 브랜드 정체성을 위한 공통 테마 색상 정의 */
+:root {
+    --primary-color: #1a9e75;   /* 메인 브랜드 색상 (밝은 초록) */
+    --primary-dark: #147d5d;    /* 활성화된 텍스트 및 강조용 (진한 초록) */
+    --primary-light: #d7ede5;   /* 활성화된 배경 및 부드러운 효과용 (연한 초록) */
+    --bg-light: #f8f9fa;        /* 페이지 배경 및 사이드바 배경 */
+    --border-color: #eee;       /* 영역 구분선 및 옅은 테두리 */
+}
+
+/* [BASE STYLES] 전체 페이지의 기본 뼈대 및 여백 초기화 */
+body { 
+    margin: 0; 
+    font-family: 'Pretendard', sans-serif; /* 한글 가독성이 좋은 폰트 우선 적용 */
+    display: flex; 
+    flex-direction: column; /* 네비바(상)와 메인(하)을 수직 배치 */
+    height: 100vh; /* 화면 전체 높이 사용 */
+    overflow: hidden; /* 바디 자체의 스크롤은 막고 컨텐츠 영역에서만 스크롤 허용 */
+}
+
+/* [NAVBAR] 상단 네비게이션 영역: 서비스의 메인 헤더 */
+.navbar { 
+    display: flex; 
+    justify-content: space-between; /* 로고는 왼쪽, 메뉴는 오른쪽 끝 배치 */
+    align-items: center; 
+    padding: 10px 40px; 
+    border-bottom: 1px solid var(--border-color); 
+    background: white; 
+    z-index: 10; /* 다른 컨텐츠보다 위에 오도록 설정 */
+}
+.header-left { display: flex; align-items: center; gap: 12px; } /* 로고와 프로필 간격 */
+.profile-icon { 
+    width: 32px; height: 32px; background: var(--primary-color); 
+    color: white; border-radius: 10px; /* 로봇 프로필처럼 더 둥근 네모로 변경 */
+    display: flex; 
+    align-items: center; justify-content: center; font-weight: bold; font-size: 14px; 
+}
+.logo { font-weight: bold; font-size: 20px; color: var(--primary-color); /* 복지도 초록색으로 변경 */ }
+.logo span { color: var(--primary-color); } /* 'ON' 부분도 초록색 유지 */
+nav a { text-decoration: none; color: #555; margin-left: 25px; font-size: 14px; }
+nav a.active { 
+    color: var(--primary-color); 
+    border-bottom: 2px solid var(--primary-color); 
+    padding-bottom: 5px; 
+}
+
+.lang-toggle {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 15px;
+    transition: 0.2s;
+}
+
+.lang-toggle:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* [MAIN LAYOUT] 사이드바와 채팅창이 가로로 배치되는 메인 영역 */
+.main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+/* [SIDEBAR] 사이드바: 상담 기록 목록 및 접기 기능 구현 */
+.sidebar {
+    width: 260px;
+    background: var(--bg-light);
+    border-right: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 부드러운 접기 애니메이션 */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+/* 사이드바가 접혔을 때(JS에서 .collapsed 클래스 추가 시) */
+.sidebar.collapsed { width: 40px; cursor: pointer; } 
+
+/* 사이드바 내부 컨텐츠: 접혔을 때 서서히 사라짐 */
+.sidebar-content { 
+    flex: 1; display: flex; flex-direction: column; 
+    padding: 20px 0; overflow: hidden; transition: opacity 0.2s; 
+}
+.sidebar.collapsed .sidebar-content { opacity: 0; pointer-events: none; }
+
+/* 사이드바 헤더: 기록 제목과 컨트롤 버튼들이 있는 하얀 박스 */
+.sidebar-header { 
+    display: flex; align-items: center; padding: 12px 15px; margin: 5px 10px 10px 10px; /* 여백을 최소화하여 최대한 위로 올림 */
+    background: white; border: 1px solid #ddd; border-radius: 10px; white-space: nowrap; gap: 10px; 
+}
+.sidebar-header span { font-weight: bold; font-size: 14px; color: #333; flex: 1; }
+
+.new-chat-btn { 
+    border: 1px solid #ddd; background: #f9f9f9; padding: 6px 10px; 
+    border-radius: 20px; cursor: pointer; font-size: 11px; transition: 0.2s; 
+}
+.new-chat-btn:hover { background: #eee; }
+
+.toggle-btn-inner {
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #bbb; padding: 2px; transition: 0.2s;
+}
+.toggle-btn-inner:hover { color: #888; }
+
+/* 사이드바가 접혔을 때 가운대 정렬되어 나타날 화살표 아이콘 */
+.sidebar.collapsed::after {
+    content: "chevron_right"; font-family: 'Material Symbols Outlined';
+    position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
+    color: #bbb; font-size: 24px;
+}
+
+/* [HISTORY LIST] 개별 상담 기록 항목 스타일 */
+.history-list { list-style: none; padding: 10px 0; margin: 0; overflow-y: auto; flex: 1; } /* 목록 길어지면 스크롤 발생 */
+.history-list li { 
+    padding: 12px 20px; font-size: 13px; cursor: pointer; color: #555; 
+    display: flex; justify-content: space-between; align-items: center; 
+    transition: 0.2s; margin: 4px 10px; border-radius: 8px; user-select: none;
+}
+.history-list li:hover { background: #f0f0f0; } /* 마우스 올렸을 때 피드백 */
+.history-list li.active { 
+    background: var(--primary-light); /* 현재 보고 있는 상담 강조색 */
+    color: var(--primary-dark); 
+    font-weight: bold; 
+}
+
+.chat-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+
+/* 기록 우측 삭제/수정 버튼 모음 (평소엔 숨김) */
+.history-actions { display: flex; gap: 4px; visibility: hidden; }
+.history-list li:hover .history-actions { visibility: visible; } /* 해당 항목 hover 시에만 노출 */
+.action-btn {
+    background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; padding: 2px; border-radius: 4px;
+}
+.action-btn:hover { background: #f0f0f0; color: var(--primary-color); }
+.delete-btn:hover { color: #ff5f5f; background: #ffebeb; }
+
+/* 이름 수정 시 나타나는 입력 필드 */
+.rename-input {
+    background: white; border: 1px solid var(--primary-color);
+    border-radius: 4px; padding: 2px 5px; font-size: 13px; width: 80%; outline: none;
+}
+
+/* [CHAT AREA] 메인 채팅창 및 헤더 구성 */
+.chat-section { flex: 1; display: flex; flex-direction: column; background: #fff; }
+.chat-header { display: flex; padding: 20px 30px; border-bottom: 1px solid var(--border-color); }
+.bot-profile { 
+    width: 40px; height: 40px; background: var(--primary-color); 
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 15px; 
+}
+.bot-info strong { font-size: 15px; display: block; margin-bottom: 3px; }
+.bot-info p { margin: 0; font-size: 12px; color: #999; }
+
+/* 메시지가 표시되는 스크롤 영역 */
+.chat-window { flex: 1; padding: 30px; overflow-y: auto; background-color: #fafafa; }
+
+/* [BUBBLES] 메시지 말풍선 세부 디자인 */
+.message-wrapper { display: flex; margin-bottom: 20px; align-items: flex-start; }
+.bot-profile-sm { 
+    width: 28px; height: 28px; background: var(--primary-color); 
+    border-radius: 8px; margin-right: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-top: 5px; 
+}
+.bubble { 
+    background: white; padding: 15px 20px; border-radius: 0 15px 15px 15px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-width: 60%; font-size: 14px; line-height: 1.6; 
+}
+.action-row { margin-top: 10px; display: flex; align-items: center; gap: 10px; } /* TTS 버튼과 시간 표시 */
+.voice-btn { 
+    background: none; border: 1px solid #eee; width: 28px; height: 28px; 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #ccc; 
+}
+.voice-btn.active { color: var(--primary-color); border-color: var(--primary-color); }
+.time { font-size: 11px; color: #bbb; }
+
+/* 상담 중 AI가 제시하는 선택지 버튼 */
+.options { display: flex; gap: 8px; margin-left: 38px; margin-top: 10px; flex-wrap: wrap; }
+.opt-btn { 
+    padding: 8px 16px; border: 1px solid #ddd; border-radius: 20px; 
+    background: white; font-size: 13px; cursor: pointer; transition: 0.2s; 
+}
+.opt-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.opt-btn.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+/* [INPUT BOX] 하단 입력 필드 및 버튼 디자인 */
+.input-area { padding: 20px 40px 30px; display: flex; align-items: center; gap: 15px; background: #fff; }
+.input-container {
+    flex: 1; display: flex; align-items: center; background: #f9f9f9;
+    border: 1px solid #eee; border-radius: 12px; padding: 12px 20px; transition: all 0.2s;
+}
+/* 입력창 포커스 시 테두리 색상 변화 (가독성 향상) */
+.input-container:focus-within {
+    border-color: var(--primary-color); background: #fff;
+    box-shadow: 0 0 0 2px rgba(26, 158, 117, 0.1);
+}
+.input-container input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; }
+.char-count { font-size: 12px; color: #ccc; margin-right: 15px; }
+.send-btn { 
+    background: var(--primary-color); border: none; color: white; 
+    border-radius: 6px; padding: 4px; cursor: pointer; display: flex; align-items: center; 
+}
+
+.mic-btn { 
+    width: 48px; height: 48px; border-radius: 50%; border: 1px solid #eee; 
+    background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #bbb; 
+}
+.mic-btn.active { border-color: var(--primary-color); color: var(--primary-color); background: #f0fdf9; }
+
+/* [POLICY CARDS] 정책 선택 단계에서 나타나는 카드 스타일 */
+.policy-card:hover {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+.policy-card:active {
+    transform: translateY(0);
+}
+
+/* [TYPING INDICATOR] 챗봇이 응답 중일 때 표시되는 애니메이션 아이콘 */
+.message-wrapper[id^="loading-"] .bubble {
+    background: transparent;
+    box-shadow: none;
+    padding: 5px 0;
+}
+
+.typing-indicator {
+    width: 40px;
+    height: 40px;
+    
+    /* 사용자 제공 이미지 */
+    background-image: url('./로딩.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    background-color: transparent; 
+    border-radius: 50%;
+
+    animation: spin 1s linear infinite;
+}
+
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

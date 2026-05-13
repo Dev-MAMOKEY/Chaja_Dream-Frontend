@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>찾아드림</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- [FONTS] 구글 머티리얼 심볼 아이콘 폰트 연결: 버튼 등에 사용되는 아이콘 모음 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body>
+
+    <!-- [NAVBAR] 상단 고정 네비게이션: 서비스 정체성 확인 및 주요 페이지 이동 -->
+    <header class="navbar">
+        <div class="header-left">
+            <!-- 사용자 프로필 아바타: '복'이라는 글자로 계정 느낌 부여 -->
+            <div class="profile-icon">복</div>
+            <!-- 로고: '복지'와 'ON'을 구분하여 스타일링함 -->
+            <div class="logo">복지<span>ON</span></div>
+        </div>
+        <!-- 상단 메뉴: 클릭 시 해당 섹션으로 이동 (현재는 데모 링크) -->
+        <nav>
+            <a href="../background/index.html">홈</a>
+            <a href="#" class="active">AI 탐색</a> <!-- 현재 활성화된 페이지 표시 -->
+            <a href="#">맞춤 혜택</a>
+            <a href="#">알림</a>
+            <button id="lang-toggle" class="lang-toggle">EN</button>
+        </nav>
+    </header>
+
+    <!-- [MAIN CONTAINER] 사이드바와 대화창이 나란히 배치되는 전체 프레임 -->
+    <div class="main-container">
+        
+        <!-- [SIDEBAR] 화면 왼쪽: 상담 기록을 관리하고 새 대화를 여는 보조 메뉴 -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-content">
+                <!-- 사이드바 상단 컨트롤 박스 -->
+                <div class="sidebar-header">
+                    <span>상담 기록</span>
+                    <!-- 신규 대화를 생성하는 핵심 버튼 -->
+                    <button id="new-chat-btn" class="new-chat-btn">+ 새 대화</button>
+                    <!-- 사이드바를 접거나 펴서 화면 공간을 확보하는 전환 버튼 -->
+                    <button id="toggle-sidebar" class="toggle-btn-inner">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                </div>
+                <!-- 상담 목록 출력부: script.js의 renderHistory() 함수를 통해 데이터가 채워짐 -->
+                <ul class="history-list" id="history-list"></ul>
+            </div>
+        </aside>
+
+        <!-- [CHAT SECTION] 화면 오른쪽: 사용자와 AI 챗봇의 대화가 진행되는 메인 영역 -->
+        <main class="chat-section">
+            <!-- 채팅 헤더: 현재 대화 상대(AI)의 정보를 보여줌 -->
+            <div class="chat-header">
+                <div class="bot-profile">🤖</div>
+                <div class="bot-info">
+                    <strong>복지혜택 AI 챗봇</strong>
+                    <p>몇 가지 질문에 답하면 맞춤 복지 혜택을 추천해드려요.</p>
+                </div>
+            </div>
+
+            <!-- 대화창 영역: 모든 메시지(나와 AI)가 실시간으로 쌓이는 공간 -->
+            <div id="chat-window" class="chat-window">
+                <!-- 메시지는 JavaScript에 의해 동적으로 생성되어 여기에 추가됨 -->
+            </div>
+
+            <!-- 하단 입력 영역: 텍스트 입력 및 전송 제어 -->
+            <div class="input-area">
+                <div class="input-container" id="input-box">
+                    <!-- 텍스트 입력창: 사용자가 상담 내용을 직접 타이핑함 -->
+                    <input type="text" id="chat-input" placeholder="상황을 입력하거나 버튼을 선택해 주세요">
+                    <!-- 글자수 표시기: 500자 제한을 시각적으로 안내 -->
+                    <span class="char-count" id="char-count">0/500</span>
+                    <!-- 전송 버튼: 입력 내용을 대화창에 반영 -->
+                    <button id="send-btn" class="send-btn">
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
+                </div>
+                <!-- 마이크 버튼: 음성 인식(STT) 기능을 시작/종료함 -->
+                <button id="mic-btn" class="mic-btn">
+                    <span class="material-symbols-outlined">mic</span>
+                </button>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- [SCRIPTS] 애플리케이션 기능을 구현하는 JavaScript 파일 연결 -->
+    <script src="script.js"></script>
+</body>
+</html>
