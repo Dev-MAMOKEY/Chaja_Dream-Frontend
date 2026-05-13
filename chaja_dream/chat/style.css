@@ -43,6 +43,24 @@ nav a.active {
     padding-bottom: 5px; 
 }
 
+.lang-toggle {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 15px;
+    transition: 0.2s;
+}
+
+.lang-toggle:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
 /* [MAIN LAYOUT] 사이드바와 채팅창이 가로로 배치되는 메인 영역 */
 .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
 
@@ -188,3 +206,42 @@ nav a.active {
     background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #bbb; 
 }
 .mic-btn.active { border-color: var(--primary-color); color: var(--primary-color); background: #f0fdf9; }
+
+/* [POLICY CARDS] 정책 선택 단계에서 나타나는 카드 스타일 */
+.policy-card:hover {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+.policy-card:active {
+    transform: translateY(0);
+}
+
+/* [TYPING INDICATOR] 챗봇이 응답 중일 때 표시되는 애니메이션 아이콘 */
+.message-wrapper[id^="loading-"] .bubble {
+    background: transparent;
+    box-shadow: none;
+    padding: 5px 0;
+}
+
+.typing-indicator {
+    width: 40px;
+    height: 40px;
+    
+    /* 사용자 제공 이미지 */
+    background-image: url('./로딩.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    background-color: transparent; 
+    border-radius: 50%;
+
+    animation: spin 1s linear infinite;
+}
+
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
