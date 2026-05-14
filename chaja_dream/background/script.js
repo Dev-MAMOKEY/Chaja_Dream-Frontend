@@ -94,6 +94,37 @@ const TRANSLATIONS = {
 };
 
 let currentLang = localStorage.getItem('lang') || 'ko';
+const API_BASE_URL = "http://localhost:8080";
+let dynamicNews = [];
+
+async function fetchWelfareNews() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/welfare/news?pageNo=1&numOfRows=3`);
+        if (!response.ok) throw new Error("Network response was not ok");
+        dynamicNews = await response.json();
+        renderNews();
+    } catch (error) {
+        console.error("Error fetching news:", error);
+    }
+}
+
+function renderNews() {
+    const updateGrid = document.querySelector('.update-grid');
+    if (!updateGrid || dynamicNews.length === 0) return;
+
+    updateGrid.innerHTML = ''; // Clear existing
+    dynamicNews.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'update-card';
+        card.innerHTML = `
+            <span class="new-badge">NEW</span>
+            <h4>${item.serviceName}</h4>
+            <p>${item.description}</p>
+            <a href="${item.link}" target="_blank" class="more-link">${TRANSLATIONS[currentLang].news_more}</a>
+        `;
+        updateGrid.appendChild(card);
+    });
+}
 
 function updateUIByLanguage() {
     const t = TRANSLATIONS[currentLang];
@@ -137,16 +168,27 @@ function updateUIByLanguage() {
     // News
     document.querySelector('.updates .section-label').textContent = t.news_label;
     document.querySelector('.updates .section-title').textContent = t.news_title;
-    const updateCards = document.querySelectorAll('.update-card');
-    updateCards[0].querySelector('h4').textContent = t.news_card1_title;
-    updateCards[0].querySelector('p').textContent = t.news_card1_desc;
-    updateCards[0].querySelector('.more-link').textContent = t.news_more;
-    updateCards[1].querySelector('h4').textContent = t.news_card2_title;
-    updateCards[1].querySelector('p').textContent = t.news_card2_desc;
-    updateCards[1].querySelector('.more-link').textContent = t.news_more;
-    updateCards[2].querySelector('h4').textContent = t.news_card3_title;
-    updateCards[2].querySelector('p').textContent = t.news_card3_desc;
-    updateCards[2].querySelector('.more-link').textContent = t.news_more;
+    
+    if (dynamicNews.length > 0) {
+        renderNews();
+    } else {
+        const updateCards = document.querySelectorAll('.update-card');
+        if (updateCards.length > 0) {
+            updateCards[0].querySelector('h4').textContent = t.news_card1_title;
+            updateCards[0].querySelector('p').textContent = t.news_card1_desc;
+            updateCards[0].querySelector('.more-link').textContent = t.news_more;
+        }
+        if (updateCards.length > 1) {
+            updateCards[1].querySelector('h4').textContent = t.news_card2_title;
+            updateCards[1].querySelector('p').textContent = t.news_card2_desc;
+            updateCards[1].querySelector('.more-link').textContent = t.news_more;
+        }
+        if (updateCards.length > 2) {
+            updateCards[2].querySelector('h4').textContent = t.news_card3_title;
+            updateCards[2].querySelector('p').textContent = t.news_card3_desc;
+            updateCards[2].querySelector('.more-link').textContent = t.news_more;
+        }
+    }
     
     // Steps
     document.querySelector('.steps .section-label').textContent = t.steps_label;
@@ -168,6 +210,7 @@ function updateUIByLanguage() {
 
 document.addEventListener('DOMContentLoaded', () => {
     updateUIByLanguage();
+    fetchWelfareNews();
     
     const langToggleBtn = document.getElementById('lang-toggle');
     langToggleBtn.addEventListener('click', () => {

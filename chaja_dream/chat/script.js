@@ -84,7 +84,7 @@ const langToggleBtn = document.getElementById('lang-toggle');   // 언어 전환
 /**
  * [API CONFIGURATION]
  */
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "http://43.202.11.116:8080";
 
 const INITIAL_STATE = {
     phase: "intake",
