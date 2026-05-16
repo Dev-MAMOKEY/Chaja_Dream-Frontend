@@ -94,12 +94,16 @@ const TRANSLATIONS = {
 };
 
 let currentLang = localStorage.getItem('lang') || 'ko';
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "https://unable-subgroup-deniable.ngrok-free.dev";
 let dynamicNews = [];
 
 async function fetchWelfareNews() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/welfare/news?pageNo=1&numOfRows=3`);
+        const response = await fetch(`${API_BASE_URL}/api/welfare/news?pageNo=1&numOfRows=3`, {
+            headers: {
+                "ngrok-skip-browser-warning": "true"
+            }
+        });
         if (!response.ok) throw new Error("Network response was not ok");
         dynamicNews = await response.json();
         renderNews();
