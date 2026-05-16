@@ -320,6 +320,14 @@ function addUserMessage(text, chat) {
 }
 
 // 봇 메시지 추가 (텍스트 및 상태에 따른 추가 요소 포함)
+function formatMessage(text) {
+    if (!text) return '';
+    return text
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // **텍스트** -> <strong>텍스트</strong>
+        .replace(/\[([^\]]+)\]\s*\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold;">$1</a>') // [텍스트] (URL) -> <a href="URL">텍스트</a>
+        .replace(/(^|[^"'])((https?|ftp):\/\/[^\s"<>]+)/g, '$1<a href="$2" target="_blank" style="color: #007bff; text-decoration: underline;">$2</a>'); // 일반 URL -> <a href="URL">URL</a>
+}
+
 function addBotMessage(text, chat, state = null) {
     let optionsHtml = '';
     
@@ -345,11 +353,12 @@ function addBotMessage(text, chat, state = null) {
         optionsHtml += '</div>';
     }
 
+    const formattedText = formatMessage(text);
     const botMsg = `
         <div class="message-wrapper">
             <div class="bot-profile-sm">🤖</div>
             <div class="message-content">
-                <div class="bubble">${text}</div>
+                <div class="bubble">${formattedText}</div>
                 <div class="action-row">
                     <button class="voice-btn" onclick="toggleTTS(this, '${text.replace(/'/g, "\\'")}')">
                         <span class="material-symbols-outlined" style="font-size:18px">volume_up</span>
