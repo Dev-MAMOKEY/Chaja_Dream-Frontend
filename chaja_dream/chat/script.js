@@ -84,7 +84,7 @@ const langToggleBtn = document.getElementById('lang-toggle');   // 언어 전환
 /**
  * [API CONFIGURATION]
  */
-const API_BASE_URL = "http://43.202.11.116:8080";
+const API_BASE_URL = "https://bockji.duckdns.org";
 
 const INITIAL_STATE = {
     phase: "intake",
@@ -147,8 +147,41 @@ langToggleBtn.addEventListener('click', () => {
  * [HISTORY DATA LOGIC] 상담 기록의 생성, 출력, 수정, 삭제 기능 구현
  */
 
+// API 호출 함수 (재시도 로직 포함)
+async function callChatApi(message, history, state, retryCount = 0) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, history, state })
+        });
+
+        if (response.status === 200) {
+            return await response.json();
+        } else if (response.status === 503 && retryCount < 3) {
+            // 503 에러 시 3초 후 재시도
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            return callChatApi(message, history, state, retryCount + 1);
+        } else {
+            const errorData = await response.json().catch(() => ({ detail: "서버 오류가 발생했습니다." }));
+            // 상세 에러 내용을 문자열로 변환하여 확인 가능하게 함
+            const errorMsg = typeof errorData.detail === 'object' 
+                ? JSON.stringify(errorData.detail) 
+                : errorData.detail || "서버 오류";
+            throw new Error(errorMsg);
+        }
+    } catch (error) {
+        if (retryCount < 3 && error.message.includes("Failed to fetch")) {
+             // 네트워크 오류 시에도 재시도 가능
+             await new Promise(resolve => setTimeout(resolve, 3000));
+             return callChatApi(message, history, state, retryCount + 1);
+        }
+        throw error;
+    }
+}
+
 // '+ 새 대화' 생성: 새로운 상담 객체를 만들고 목록 최상단에 배치
-function startNewChat() {
+async function startNewChat() {
     const t = TRANSLATIONS[currentLang];
     const newId = Date.now(); // 현재 시간을 고유 식별자로 활용
     const newChat = {
@@ -156,16 +189,32 @@ function startNewChat() {
         title: `${t.new_chat_title} ${chats.length + 1}`, // 자동 제목 생성
         messages: [],        
         apiHistory: [],      // API 통신용 대화 기록 (string[])
-        state: JSON.parse(JSON.stringify({...INITIAL_STATE, lang: currentLang})) // API 통신용 상태 객체
+        state: JSON.parse(JSON.stringify({...INITIAL_STATE, lang: currentLang})), // API 통신용 상태 객체
+        isFirstMessage: true // 첫 번째 사용자 메시지 여부 추적
     };
     chats.unshift(newChat); // 배열의 맨 앞에 추가
     activeChatId = newId;   // 새 대화를 활성화 상태로 변경
     
-    // 초기 환영 인사 추가
-    addBotMessage(t.greeting, newChat);
-    
     renderHistory();        // 왼쪽 목록 다시 그리기
     renderChat();           // 오른쪽 대화창 다시 그리기
+
+    // 프론트엔드 고정 인사말 없이 즉시 AI API 호출하여 첫 메시지 수신
+    const loadingId = addLoadingMessage(newChat);
+    try {
+        const trigger = currentLang === 'ko' ? "안녕하세요" : "Hello";
+        const result = await callChatApi(trigger, [], newChat.state); 
+        removeLoadingMessage(newChat, loadingId);
+        
+        newChat.state = result.state;
+        newChat.apiHistory = result.history;
+        addBotMessage(result.reply, newChat, result.state);
+    } catch (error) {
+        console.error("Initial API Error:", error);
+        removeLoadingMessage(newChat, loadingId);
+        addBotMessage(`${t.error_api}${error.message}`, newChat);
+    }
+    
+    renderChat();
 }
 
 // 왼쪽 목록 렌더링: chats 배열의 데이터를 기반으로 HTML 리스트를 만듦
@@ -279,10 +328,17 @@ function addBotMessage(text, chat, state = null) {
         optionsHtml = '<div class="options" style="margin-left: 38px; flex-direction: column; align-items: flex-start;">';
         state.policies.forEach(policy => {
             optionsHtml += `
-                <div class="policy-card" onclick="sendMessage('${policy.name}')" style="background: white; border: 1px solid #ddd; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; width: 80%; transition: 0.2s;">
-                    <div style="font-weight: bold; color: var(--primary-color); margin-bottom: 5px;">${policy.name}</div>
-                    <div style="font-size: 13px; color: #555; margin-bottom: 5px;">${policy.benefit}</div>
-                    <div style="font-size: 11px; color: #999;">${policy.scope}</div>
+                <div class="policy-card" style="background: white; border: 1px solid #ddd; border-radius: 12px; padding: 15px; margin-bottom: 10px; width: 80%; transition: 0.2s;">
+                    <div onclick="sendMessage('${policy.name}')" style="cursor: pointer;">
+                        <div style="font-weight: bold; color: var(--primary-color); margin-bottom: 5px;">${policy.name}</div>
+                        <div style="font-size: 13px; color: #555; margin-bottom: 5px;">${policy.benefit}</div>
+                        <div style="font-size: 11px; color: #999;">${policy.scope}</div>
+                    </div>
+                    ${policy.url ? `
+                        <a href="${policy.url}" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: none; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; font-weight: 500;">
+                            상세보기 <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
+                        </a>
+                    ` : ''}
                 </div>
             `;
         });
@@ -330,35 +386,6 @@ function removeLoadingMessage(chat, loadingId) {
     chat.messages = chat.messages.filter(msg => !msg.includes(loadingId));
 }
 
-// API 호출 함수 (재시도 로직 포함)
-async function callChatApi(message, history, state, retryCount = 0) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, history, state })
-        });
-
-        if (response.status === 200) {
-            return await response.json();
-        } else if (response.status === 503 && retryCount < 3) {
-            // 503 에러 시 3초 후 재시도
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            return callChatApi(message, history, state, retryCount + 1);
-        } else {
-            const errorData = await response.json().catch(() => ({ detail: "서버 오류가 발생했습니다." }));
-            throw new Error(errorData.detail || "서버 오류");
-        }
-    } catch (error) {
-        if (retryCount < 3 && error.message.includes("Failed to fetch")) {
-             // 네트워크 오류 시에도 재시도 가능
-             await new Promise(resolve => setTimeout(resolve, 3000));
-             return callChatApi(message, history, state, retryCount + 1);
-        }
-        throw error;
-    }
-}
-
 // 사용자 메시지 전송 및 API 연동
 async function sendMessage(text) {
     if (!text.trim() || !activeChatId) return;
@@ -367,9 +394,10 @@ async function sendMessage(text) {
     if (!chat) return;
     
     // 첫 메시지일 경우 상담 제목 업데이트
-    if (chat.apiHistory.length === 0) {
+    if (chat.isFirstMessage) {
         const truncatedText = text.length > 15 ? text.substring(0, 15) + '...' : text;
         chat.title = truncatedText;
+        chat.isFirstMessage = false; // 제목 업데이트 후 플래그 해제
         renderHistory();
     }
 
@@ -494,4 +522,3 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
