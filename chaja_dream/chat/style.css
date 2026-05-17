@@ -245,3 +245,70 @@ nav a.active {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* [RESPONSIVE] 모바일 대응을 위한 미디어 쿼리 */
+@media (max-width: 768px) {
+    .navbar { 
+        padding: 10px 15px; 
+        flex-direction: column; /* 모바일에서 로고와 메뉴를 위아래로 배치하여 공간 확보 */
+        gap: 10px;
+    }
+    .header-left { width: 100%; justify-content: center; }
+    nav { 
+        width: 100%; 
+        display: flex; 
+        justify-content: center; 
+        gap: 10px;
+        overflow-x: auto; /* 메뉴가 많아질 경우 가로 스크롤 허용 */
+        padding-bottom: 5px;
+    }
+    nav a { margin-left: 0; font-size: 13px; white-space: nowrap; }
+    .lang-toggle { margin-left: 5px; }
+    
+    .sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 100;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    /* 모바일에서는 기본적으로 접힌 상태 */
+    .sidebar:not(.collapsed) { width: 240px; }
+    .sidebar.collapsed { width: 0; border: none; }
+    
+    /* 접혔을 때의 화살표 버튼을 더 눈에 띄게 수정 (초록색 원형 버튼 형태) */
+    .sidebar.collapsed::after { 
+        left: 25px; 
+        top: 20px; 
+        color: white;
+        background: var(--primary-color);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        font-weight: bold;
+    }
+
+    .chat-header { padding: 15px 20px; }
+    .chat-window { padding: 20px 15px; }
+    .bubble { max-width: 85%; } /* 모바일에서 말풍선 가로폭 확장 */
+    
+    .input-area { padding: 15px; gap: 10px; }
+    .input-container { padding: 10px 15px; }
+    .char-count { display: none; } /* 모바일에서 글자수 숨겨 공간 확보 */
+    
+    .policy-card { width: 95% !important; }
+}
+
+@media (max-width: 480px) {
+    .logo { font-size: 18px; }
+    .profile-icon { width: 28px; height: 28px; font-size: 12px; }
+    .bot-profile { width: 32px; height: 32px; font-size: 16px; }
+    .bot-info strong { font-size: 14px; }
+    .bot-info p { font-size: 11px; }
+    .bubble { font-size: 13px; padding: 12px 15px; }
+}

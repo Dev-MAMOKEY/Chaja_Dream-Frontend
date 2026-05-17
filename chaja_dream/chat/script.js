@@ -153,7 +153,7 @@ async function callChatApi(message, history, state, retryCount = 0) {
         const response = await fetch(`${API_BASE_URL}/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, history, state })
+            body: JSON.stringify({ message, history, state, lang: currentLang })
         });
 
         if (response.status === 200) {
@@ -322,10 +322,47 @@ function addUserMessage(text, chat) {
 // 봇 메시지 추가 (텍스트 및 상태에 따른 추가 요소 포함)
 function formatMessage(text) {
     if (!text) return '';
-    return text
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // **텍스트** -> <strong>텍스트</strong>
-        .replace(/\[([^\]]+)\]\s*\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold;">$1</a>') // [텍스트] (URL) -> <a href="URL">텍스트</a>
-        .replace(/(^|[^"'])((https?|ftp):\/\/[^\s"<>]+)/g, '$1<a href="$2" target="_blank" style="color: #007bff; text-decoration: underline;">$2</a>'); // 일반 URL -> <a href="URL">URL</a>
+    
+    let formatted = text;
+
+    // 1. 볼드 처리 (**텍스트**)
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+    // 2. 리스트 처리 (줄 시작이 - )
+    const lines = formatted.split(/\r?\n/);
+    let inList = false;
+    let newLines = [];
+
+    for (let line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('- ')) {
+            if (!inList) {
+                newLines.push('<ul style="margin: 10px 0; padding-left: 20px;">');
+                inList = true;
+            }
+            newLines.push(`<li style="margin-bottom: 5px;">${trimmedLine.substring(2)}</li>`);
+        } else {
+            if (inList) {
+                newLines.push('</ul>');
+                inList = false;
+            }
+            newLines.push(line);
+        }
+    }
+    if (inList) newLines.push('</ul>');
+    formatted = newLines.join('\n');
+
+    // 3. 문단 및 줄바꿈 처리
+    // \n\n -> 문단 구분 (여백이 있는 div로 변환)
+    // \n -> 줄바꿈 (<br>로 변환)
+    formatted = formatted.replace(/\n\n/g, '<div style="margin-bottom: 12px;"></div>');
+    formatted = formatted.replace(/\n/g, '<br>');
+
+    // 4. 링크 처리 (마크다운 [텍스트](URL) 및 일반 URL)
+    formatted = formatted.replace(/\[([^\]]+)\]\s*\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold;">$1</a>');
+    formatted = formatted.replace(/(^|[^"'])((https?|ftp):\/\/[^\s"<>]+)/g, '$1<a href="$2" target="_blank" style="color: #007bff; text-decoration: underline;">$2</a>');
+
+    return formatted;
 }
 
 function addBotMessage(text, chat, state = null) {
